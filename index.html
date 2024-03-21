@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+       <script src="http://d3js.org/d3.v2.js"></script>     
+        <style>
+            body{
+                background-color: #A6F5C5;
+                position: relative;
+            }
+            .link {
+                fill: none;
+                stroke: #ccc;
+                stroke-width: 1.5px;
+            }
+            div.tooltip {
+                position: absolute;
+                text-align: center;
+                width: 100px;
+                height: 100px;
+                padding: 8px;
+                font: 10px sans-serif;
+                background: #a5dbf4;
+                border: solid 1px #aaa;
+                border-radius: 8px;
+                pointer-events: none;
+            }
+        </style>
+
+    </head>
+    <body>
+
+        <div id="viz"></div>
+
+        <script type="text/javascript">
+
+            //JSON object with the data
+            var treeData = {"name" : "", "info" : "1", "children" : [
+                    {"name" : "Research", "info" : "2" , "children": [
+                    
+                    {"name" : "External", "info" : "7"
+                    , "children": [
+                    
+                    {"name" : "B2C", "info" : "17"
+                    , "children": [
+                    
+                    {"name" : "Online", "info" : "19", "desc" : "This is the online segment of the Research department" }, 
+                    {"name" : "Interview", "info" : "20" },
+                    {"name" : "Public Data", "info" : "21" }, 
+                    {"name" : "Health", "info" : "22" }
+                ]  }, 
+                    {"name" : "B2C", "info" : "18" }
+                ] }, 
+                    {"name" : "Internal", "info" : "8" }
+                ]}, 
+                    {"name" : "Planning", "info" : "3" , "children": [
+                    
+                    {"name" : "PRD", "info" : "9" }, 
+                    {"name" : "Specs", "info" : "10" }
+                ]}, 
+                    {"name" : "Designing", "info" : "4" , "children": [
+                    
+                    {"name" : "Hardware", "info" : "11" }, 
+                    {"name" : "Software", "info" : "12" }
+                ]}, 
+                    {"name" : "Manufacturing", "info" : "5" , "children": [
+                    
+                    {"name" : "Material", "info" : "13" }, 
+                    {"name" : "Production", "info" : "14" }
+                ]}, 
+                    {"name" : "Sales/Marketing", "info" : "6", "children": [
+                    
+                            {"name" : "Online", "info" : "15" }, 
+                            {"name" : "Dealership", "info" : "16" }
+                        ]} 
+                ]};
+
+            // Create a svg canvas
+            var vis = d3.select("body").append("svg")
+            .attr("viewBox", `0 0 800 600`)
+            
+      
+            // Add tooltip div
+            var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 1e-6);
+
+           
+
+            // Create a tree "canvas"
+            var tree = d3.layout.tree()
+            .size([400,600])
+            
+
+            var diagonal = d3.svg.diagonal()
+            
+
+            // Preparing the data for the tree layout, convert data into an array of nodes
+            var nodes = tree.nodes(treeData);
+            // Create an array with all the links
+            var links = tree.links(nodes);
+
+            
+
+            var link = vis.selectAll("pathlink")
+            .data(links)
+            .enter().append("svg:path")
+            .attr("class", "link")
+            .attr("d", diagonal)
+            .attr("d", function(d) {
+        // Calculate control point coordinates for the Bézier curve
+        var sourceX = d.source.y;
+        var targetX = d.target.y;
+        var sourceY = d.source.x;
+        var targetY = d.target.x;
+        var controlY = (sourceY + targetY) / 2;
+        
+        // Define the path data for a curved horizontal line
+        return "M" + sourceX + "," + sourceY
+            + "C" + sourceX + "," + controlY
+            + " " + targetX + "," + controlY
+            + " " + targetX + "," + targetY;
+    });
+            
+            
+            
+            
+
+            var node = vis.selectAll("g.node")
+            .data(nodes)
+            .enter().append("svg:g")
+            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+
+            // Add the dot at every node
+            node.append("svg:circle")
+            .on("mouseover", mouseover)
+            .on("mousemove", function(d){mousemove(d);})
+            .on("mouseout", mouseout)
+            .attr("fill","#934946")
+            .attr("r", 5.5);
+
+            node.append("svg:text")
+            .attr("dx", 8)
+            .attr("dy", 3)
+            .text(function(d) { return d.name; })
+
+            function mouseover() {
+                div.transition()
+                .duration(300)
+                .style("opacity", 1);
+            }
+
+            function mousemove(d) {
+                div
+                .text("Info about " + d.name + ":" + d.desc)
+                .style("left", (d3.event.pageX ) + "px")
+                .style("top", (d3.event.pageY) + "px");
+            }
+
+            function mouseout() {
+                div.transition()
+                .duration(300)
+                .style("opacity", 1e-6);
+            }
+        </script>
+    </body>
+</html>
